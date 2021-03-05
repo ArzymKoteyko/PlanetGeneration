@@ -10,26 +10,33 @@ public class Face
     Vector3[] verticesOfShereSector;
     int[] initialTriangles;
     int[] triangles;
+    float radius;
 
-    public Face(Mesh mesh, Vector3[] initialVertices, int[] initialTriangles)
+    public Face(Mesh mesh, Vector3[] initialVertices, int[] initialTriangles, float radius)
     {
         this.mesh = mesh;
         this.initialVertices = initialVertices;
         this.initialTriangles = initialTriangles;
 
-        triangles = initialTriangles;
-        verticesOfIcosahedronFace = initialVertices;
-
-        for (int i = 0; i < verticesOfIcosahedronFace.Length; i++)
-        {
-            verticesOfShereSector[i] = verticesOfIcosahedronFace[i].normalized;
-        }
-
-
+        triangles = new int[] { 0, 1, 2 };
+        verticesOfIcosahedronFace = this.initialVertices;
+        verticesOfShereSector = new Vector3[3];
+        this.radius = radius;
+        recanculateHights(radius);
     }
 
-    public void generateFace()
+    private void recanculateHights(float radius)
     {
+        for (int i = 0; i < verticesOfIcosahedronFace.Length; i++)
+        {
+            verticesOfShereSector[i] = verticesOfIcosahedronFace[i].normalized * radius;
+        }
+    }
+
+    public void generateFace(float radius)
+    {
+        this.radius = radius;
+        recanculateHights(radius);
         mesh.Clear();
         mesh.vertices = verticesOfShereSector;
         mesh.triangles = triangles;

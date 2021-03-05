@@ -4,36 +4,28 @@ using UnityEngine;
 
 public class Planet : MonoBehaviour
 {
-    Mesh mesh;
-
-    [SerializeField]
-    MeshFilter meshFilter;
+    [SerializeField, HideInInspector]
+    MeshFilter[] meshFilters;
+    Face[]       faces;
     [Range(.1f, 4f)]
     public float radius = 1f;
 
-    Vector3[] vertices;
     Vector3[] verticesOfIcosahedron;
     float phi = 1.61803399f;
     int[] triangles;
 
 
-
     private void OnValidate()
     {
         Initialize();
+        for (int i = 0; i < 20; i++)
+        {
+            faces[i].generateFace(radius);
+        }
     }
 
     void Initialize()
     {
-        if (meshFilter == null)
-        {
-            GameObject meshObj = new GameObject("mesh");
-            meshObj.transform.parent = transform;
-
-            meshObj.AddComponent<MeshRenderer>().sharedMaterial = new Material(Shader.Find("Standard"));
-            meshFilter = meshObj.AddComponent<MeshFilter>();
-            meshFilter.sharedMesh = new Mesh();
-        }
 
         //Creating array of Icosahedron's vertices
         verticesOfIcosahedron = new Vector3[]
@@ -79,11 +71,49 @@ public class Planet : MonoBehaviour
             11, 7,  4,      1,  2,  6
         };
 
-        meshFilter.sharedMesh.Clear();
-        meshFilter.sharedMesh.vertices = verticesOfShere;
-        meshFilter.sharedMesh.triangles = triangles;
-        meshFilter.sharedMesh.RecalculateNormals();
+        // Creating array of MeshFilters if dosen't exit already
+        if (meshFilters == null || meshFilters.Length == 0)
+        {
+            meshFilters = new MeshFilter[20];
+        }
+        // Creating array of faces if dosen't exit already
+        if (faces == null || faces.Length == 0)
+        {
+            faces = new Face[20];
+        }
 
+        // For each MeshFilter creating a Game object that contains it
+        for (int i = 0; i < 20; i++)
+        {
+            // cheking if mesh filter already exists
+            if (meshFilters[i] == null)
+            {
+                GameObject gameObject = new GameObject($"mesh_{i}");
+                gameObject.transform.parent = transform;
+
+
+                gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(Shader.Find("Standard"));
+                meshFilters[i] = gameObject.AddComponent<MeshFilter>();
+                meshFilters[i].sharedMesh = new Mesh();
+            }
+
+            // chosing one of 20 triangles to be a face
+            int[] representableTriangle = new int[] {
+                triangles[3 * i],
+                triangles[3 * i + 1],
+                triangles[3 * i + 2]
+            };
+
+            // searching for points of triangle vertices
+            Vector3[] triangleVertices = new Vector3[] {
+                verticesOfIcosahedron[representableTriangle[0]],
+                verticesOfIcosahedron[representableTriangle[1]],
+                verticesOfIcosahedron[representableTriangle[2]]
+            };
+
+            // creating a face from triangle
+            faces[i] = new Face(meshFilters[i].sharedMesh, triangleVertices, representableTriangle, radius);
+        }
     }
 
 }
