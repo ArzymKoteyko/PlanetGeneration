@@ -9,6 +9,8 @@ public class Planet : MonoBehaviour
     Face[]       faces;
     [Range(.1f, 4f)]
     public float radius = 1f;
+    [Range(2, 100)]
+    public int resolution = 10;
 
     Vector3[] verticesOfIcosahedron;
     float phi = 1.61803399f;
@@ -48,13 +50,6 @@ public class Planet : MonoBehaviour
 
         };
 
-        // Translating vertices to Sphere 
-        // Also aplying some height functions
-        Vector3[] verticesOfShere = new Vector3[12];
-        for (int i = 0; i < 12; i++)
-        {
-            verticesOfShere[i] = verticesOfIcosahedron[i].normalized * radius;
-        }
 
         // Creating array of Icosahedron's triangle faces
         triangles = new int[]
@@ -112,7 +107,7 @@ public class Planet : MonoBehaviour
             };
 
             // creating a face from triangle
-            faces[i] = new Face(meshFilters[i].sharedMesh, triangleVertices, representableTriangle, radius);
+            faces[i] = new Face(meshFilters[i].sharedMesh, triangleVertices, radius, resolution);
         }
     }
 
